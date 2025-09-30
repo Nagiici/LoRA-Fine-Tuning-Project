@@ -206,44 +206,6 @@ set HF_HUB_DISABLE_SYMLINKS_WARNING=1
 - CUDA 11.0+（GPU 训练）
 - PyTorch 2.0+
 
-## 常见问题
-
-### Q: ImportError: To support decoding images, please install 'Pillow'
-```bash
-pip install Pillow
-```
-
-### Q: CUDA out of memory
-**解决方案：**
-1. 减小 batch size（修改脚本中的 `batch_size=2` 为 `batch_size=1`）
-2. 使用更小的模型
-3. 使用 CPU（训练会很慢）
-
-### Q: bitsandbytes 错误（Windows）
-**不用担心！** 脚本已自动适配 Windows，会使用 float16/float32 代替 8-bit 量化。
-
-### Q: 模型下载失败或很慢
-```bash
-# 使用 HuggingFace 镜像（中国用户）
-export HF_ENDPOINT=https://hf-mirror.com  # Linux/Mac
-set HF_ENDPOINT=https://hf-mirror.com     # Windows
-```
-
-### Q: 如何查看训练进度？
-- 训练过程会实时显示损失（Loss）
-- 每 10 个 batch 显示一次生成示例
-- 训练结束后生成损失曲线图
-
-### Q: 如何使用微调后的模型？
-```python
-# 推理时会自动加载微调权重
-from peft import PeftModel, PeftConfig
-
-config = PeftConfig.from_pretrained("./output/blip2_lora")
-model = AutoModelForVision2Seq.from_pretrained(config.base_model_name_or_path)
-model = PeftModel.from_pretrained(model, "./output/blip2_lora")
-```
-
 ## 数据集说明
 
 ### 训练数据集
