@@ -161,10 +161,6 @@ model = AutoModelForVision2Seq.from_pretrained(pretrain_model_path)
 3. 如果不是 → 视为 HuggingFace ID，从 Hub 下载
 4. 下载的模型自动缓存到 `~/.cache/huggingface/hub/`
 
-详细说明请运行：
-```bash
-python model_loading_example.py
-```
 
 ## 系统兼容性
 
