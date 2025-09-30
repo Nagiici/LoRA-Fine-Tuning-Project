@@ -1,0 +1,9 @@
+datasets
+transformers
+torch
+Pillow
+accelerate
+sentencepiece
+peft
+bitsandbytes
+matplotlib
