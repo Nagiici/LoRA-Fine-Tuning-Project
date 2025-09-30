@@ -54,12 +54,26 @@ def main():
     parser.add_argument("--train-dataset-path", type=str, default="ybelkada/football-dataset", help="训练集路径")
     parser.add_argument("--test-dataset-path", type=str, default="ybelkada/football-dataset", help="测试集路径")
     parser.add_argument("--output-path", type=str, default="./output/blip2_lora",help="模型输出路径")
+    parser.add_argument("--batch-size", type=int, default=2, help="训练批次大小")
+    parser.add_argument("--learning-rate", type=float, default=5e-5, help="学习率")
+    parser.add_argument("--epochs", type=int, default=11, help="训练轮数")
+    parser.add_argument("--lora-r", type=int, default=16, help="LoRA秩")
+    parser.add_argument("--lora-alpha", type=int, default=32, help="LoRA alpha参数,通常为LoRA秩的两倍")
+    parser.add_argument("--lora-dropout", type=float, default=0.05, help="LoRA dropout")
+    parser.add_argument("--print-freq", type=int, default=10, help="生成输出的频率(每n个batch)")
 
     args = parser.parse_args()
     train_dataset_path = args.train_dataset_path
     test_dataset_path = args.test_dataset_path
     output_path = args.output_path
     pretrain_model_path = args.pretrain_model_path
+    batch_size = args.batch_size
+    learning_rate = args.learning_rate
+    epochs = args.epochs
+    lora_r = args.lora_r
+    lora_alpha = args.lora_alpha
+    lora_dropout = args.lora_dropout
+    print_freq = args.print_freq
 
     if not os.path.exists(output_path):
         os.makedirs(output_path)
@@ -110,9 +124,9 @@ def main():
 
     # Let's define the LoraConfig
     config = LoraConfig(
-        r=16,
-        lora_alpha=32,
-        lora_dropout=0.05,
+        r=lora_r,
+        lora_alpha=lora_alpha,
+        lora_dropout=lora_dropout,
         bias="none",
     )
     # Get our peft model and print the number of trainable parameters
@@ -140,9 +154,9 @@ def main():
     dataset = load_dataset(train_dataset_path, split="train")
 
     train_dataset = ImageCaptioningDataset(dataset, processor)
-    train_dataloader = DataLoader(train_dataset, shuffle=True, batch_size=2, collate_fn=collator)
+    train_dataloader = DataLoader(train_dataset, shuffle=True, batch_size=batch_size, collate_fn=collator)
 
-    optimizer = torch.optim.AdamW(model.parameters(), lr=5e-5)
+    optimizer = torch.optim.AdamW(model.parameters(), lr=learning_rate)
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
     # 确定数据类型
@@ -150,7 +164,7 @@ def main():
 
     model.train()
     loss_list = []
-    for epoch in range(11):
+    for epoch in range(epochs):
         print("Epoch:", epoch)
         sum_loss_list = []
         for idx, batch in enumerate(train_dataloader):
@@ -170,7 +184,7 @@ def main():
                 optimizer.step()
                 optimizer.zero_grad()
 
-                if idx % 10 == 0:
+                if idx % print_freq == 0:
                         generated_output = model.generate(pixel_values=pixel_values)
                         print(processor.batch_decode(generated_output, skip_special_tokens=True))
             
